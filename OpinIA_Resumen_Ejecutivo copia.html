@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpinIA — Resumen ejecutivo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f172a;
+    --azul: #2E5F8A;
+    --azul-claro: #5B9BD5;
+    --lavanda: #B8A9D0;
+    --rosa: #F2B5D4;
+    --rosa-soft: #fce4f0;
+    --melocoton: #FFD4B8;
+    --blanco: #FAFCFF;
+    --gris: #7B8794;
+    --gris-claro: #e8edf2;
+    --bg-cream: #fdf8f4;
+    --card-shadow: 0 8px 40px rgba(15, 23, 42, 0.06), 0 2px 12px rgba(178, 169, 208, 0.12);
+    --card-hover: 0 16px 64px rgba(15, 23, 42, 0.1), 0 4px 20px rgba(242, 181, 212, 0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-cream);
+    color: var(--navy);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -30%; left: -20%;
+    width: 140%; height: 160%;
+    background: 
+      radial-gradient(ellipse 600px 500px at 20% 30%, rgba(242,181,212,0.35) 0%, transparent 70%),
+      radial-gradient(ellipse 500px 400px at 75% 60%, rgba(184,169,208,0.3) 0%, transparent 70%),
+      radial-gradient(ellipse 400px 300px at 50% 80%, rgba(255,212,184,0.25) 0%, transparent 70%),
+      radial-gradient(ellipse 300px 300px at 90% 20%, rgba(91,155,213,0.15) 0%, transparent 70%);
+    animation: blobMove 20s ease-in-out infinite alternate;
+    z-index: 0;
+  }
+
+  @keyframes blobMove {
+    0% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-30px, 20px) scale(1.02); }
+    66% { transform: translate(20px, -15px) scale(0.98); }
+    100% { transform: translate(-10px, 10px) scale(1.01); }
+  }
+
+  .hero-content { position: relative; z-index: 1; max-width: 800px; }
+
+  .hero-badge {
+    display: inline-block;
+    padding: 0.4rem 1.2rem;
+    border-radius: 100px;
+    background: rgba(242,181,212,0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(242,181,212,0.4);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--azul);
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--azul) 50%, var(--lavanda) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+    animation: fadeInUp 0.8s ease-out 0.4s both;
+  }
+
+  .hero-subtitle {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--azul);
+    margin-bottom: 2.5rem;
+    animation: fadeInUp 0.8s ease-out 0.6s both;
+  }
+
+  .hero-meta {
+    font-size: 0.85rem;
+    color: var(--gris);
+    line-height: 1.8;
+    animation: fadeInUp 0.8s ease-out 0.8s both;
+  }
+
+  .hero-meta strong { color: var(--navy); font-weight: 600; }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    animation: bounce 2s ease-in-out infinite;
+    color: var(--lavanda);
+    font-size: 1.5rem;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(10px); }
+  }
+
+  /* ── SECTIONS ── */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  section {
+    padding: 5rem 0;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--rosa);
+    margin-bottom: 0.5rem;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 1rem;
+    line-height: 1.15;
+  }
+
+  .section-desc {
+    font-size: 1.05rem;
+    color: var(--gris);
+    max-width: 640px;
+    line-height: 1.7;
+    margin-bottom: 3rem;
+  }
+
+  /* ── KPI CARDS ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .kpi-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: var(--card-shadow);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .kpi-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--card-hover);
+  }
+
+  .kpi-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 4px;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .kpi-card:nth-child(1)::after { background: linear-gradient(90deg, var(--rosa), var(--lavanda)); }
+  .kpi-card:nth-child(2)::after { background: linear-gradient(90deg, var(--lavanda), var(--azul-claro)); }
+  .kpi-card:nth-child(3)::after { background: linear-gradient(90deg, var(--azul-claro), var(--azul)); }
+  .kpi-card:nth-child(4)::after { background: linear-gradient(90deg, var(--melocoton), var(--rosa)); }
+
+  .kpi-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: var(--navy);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+
+  .kpi-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--gris);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .kpi-detail {
+    font-size: 0.8rem;
+    color: var(--lavanda);
+    margin-top: 0.5rem;
+    font-weight: 500;
+  }
+
+  /* ── CHART CARDS ── */
+  .chart-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .chart-row { grid-template-columns: 1fr; }
+  }
+
+  .chart-card {
+    background: white;
+    border-radius: 24px;
+    padding: 2rem;
+    box-shadow: var(--card-shadow);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .chart-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .chart-card:hover {
+    box-shadow: var(--card-hover);
+  }
+
+  .chart-card.full {
+    grid-column: 1 / -1;
+  }
+
+  .chart-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 0.3rem;
+  }
+
+  .chart-subtitle {
+    font-size: 0.8rem;
+    color: var(--gris);
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/10;
+  }
+
+  .chart-container.square {
+    aspect-ratio: 1;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  /* ── PIPELINE ── */
+  .pipeline {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    padding: 1rem 0 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .pipeline-step {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .pipeline-node {
+    background: white;
+    border-radius: 16px;
+    padding: 1.2rem 1.5rem;
+    box-shadow: var(--card-shadow);
+    min-width: 160px;
+    text-align: center;
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  .pipeline-node.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .pipeline-node:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--card-hover);
+  }
+
+  .pipeline-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .pipeline-name {
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--navy);
+    margin-bottom: 0.15rem;
+  }
+
+  .pipeline-tech {
+    font-size: 0.7rem;
+    color: var(--gris);
+  }
+
+  .pipeline-arrow {
+    color: var(--lavanda);
+    font-size: 1.4rem;
+    padding: 0 0.6rem;
+    flex-shrink: 0;
+  }
+
+  /* ── TABLE ── */
+  .results-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    background: white;
+  }
+
+  .results-table thead th {
+    background: var(--navy);
+    color: white;
+    padding: 1rem 1.2rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+  }
+
+  .results-table tbody tr {
+    transition: all 0.2s ease;
+  }
+
+  .results-table tbody tr:hover {
+    background: rgba(242,181,212,0.08);
+  }
+
+  .results-table tbody td {
+    padding: 0.9rem 1.2rem;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--gris-claro);
+  }
+
+  .results-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .results-table .winner {
+    background: linear-gradient(90deg, rgba(242,181,212,0.12), rgba(184,169,208,0.08));
+  }
+
+  .results-table .winner td:first-child {
+    font-weight: 700;
+    color: var(--azul);
+  }
+
+  .metric-bar {
+    display: inline-block;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--rosa), var(--lavanda));
+    margin-right: 0.6rem;
+    vertical-align: middle;
+    transition: width 1s ease-out;
+  }
+
+  /* ── CONCLUSION ── */
+  .conclusion-card {
+    background: linear-gradient(135deg, var(--navy) 0%, #1e3a5f 100%);
+    border-radius: 28px;
+    padding: 3.5rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .conclusion-card::before {
+    content: '';
+    position: absolute;
+    top: -50%; right: -20%;
+    width: 60%; height: 200%;
+    background: radial-gradient(ellipse, rgba(242,181,212,0.12), transparent 70%);
+    pointer-events: none;
+  }
+
+  .conclusion-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    margin-bottom: 1.2rem;
+    position: relative;
+  }
+
+  .conclusion-card p {
+    font-size: 1rem;
+    line-height: 1.8;
+    opacity: 0.85;
+    max-width: 700px;
+    position: relative;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--gris);
+    font-size: 0.8rem;
+  }
+
+  footer a {
+    color: var(--azul);
+    text-decoration: none;
+  }
+
+  footer strong {
+    color: var(--navy);
+  }
+
+  /* ── ANIMATE ON SCROLL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════ HERO ═══════ -->
+<header class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">Resumen ejecutivo · PLN · CEU San Pablo 2026</div>
+    <h1>OpinIA</h1>
+    <p class="hero-subtitle">Inteligencia de reputación online para e-commerce español</p>
+    <div class="hero-meta">
+      <strong>María Luisa Ros Bolea</strong><br>
+      Máster en Big Data e Inteligencia Artificial<br>
+      Técnicas avanzadas en IA y Big Data · Práctica de PLN
+    </div>
+  </div>
+  <div class="scroll-hint">&#8595;</div>
+</header>
+
+<!-- ═══════ KPIs ═══════ -->
+<section>
+  <div class="container">
+    <p class="section-label">Resultados clave</p>
+    <h2 class="section-title">Lo que OpinIA consigue</h2>
+    <p class="section-desc">Análisis automatizado de 210.000 reseñas reales en español con 6 modelos de PLN, desde BoW hasta BERT. Todo ejecutado en 31 minutos en Google Colab.</p>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-number" data-target="75.9" data-suffix="%">0%</div>
+        <div class="kpi-label">F1 Score mejor modelo</div>
+        <div class="kpi-detail">BERT multilingüe zero-shot</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-number" data-target="210" data-suffix="K">0K</div>
+        <div class="kpi-label">Reseñas analizadas</div>
+        <div class="kpi-detail">Amazon Reviews Multi (ES)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-number" data-target="6" data-suffix="">0</div>
+        <div class="kpi-label">Modelos comparados</div>
+        <div class="kpi-detail">Clásicos + Transformers</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-number" data-target="31" data-suffix=" min">0 min</div>
+        <div class="kpi-label">Tiempo total pipeline</div>
+        <div class="kpi-detail">Google Colab · T4 GPU</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ PIPELINE ═══════ -->
+<section style="background: white; padding: 4rem 0;">
+  <div class="container">
+    <p class="section-label reveal">Arquitectura técnica</p>
+    <h2 class="section-title reveal">Pipeline completo de OpinIA</h2>
+    <p class="section-desc reveal">12 secciones que cubren desde el preprocesamiento clásico hasta búsqueda semántica con FAISS.</p>
+
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <div class="pipeline-node">
+          <div class="pipeline-icon">&#x1F4E6;</div>
+          <div class="pipeline-name">Dataset</div>
+          <div class="pipeline-tech">210K reseñas ES</div>
+        </div>
+        <div class="pipeline-arrow">&#x2192;</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-node">
+          <div class="pipeline-icon">&#x1F9F9;</div>
+          <div class="pipeline-name">Limpieza</div>
+          <div class="pipeline-tech">NLTK · Regex</div>
+        </div>
+        <div class="pipeline-arrow">&#x2192;</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-node">
+          <div class="pipeline-icon">&#x1F4CA;</div>
+          <div class="pipeline-name">Clásicos</div>
+          <div class="pipeline-tech">BoW · TF-IDF</div>
+        </div>
+        <div class="pipeline-arrow">&#x2192;</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-node">
+          <div class="pipeline-icon">&#x1F916;</div>
+          <div class="pipeline-name">Transformers</div>
+          <div class="pipeline-tech">BERT · DistilBERT</div>
+        </div>
+        <div class="pipeline-arrow">&#x2192;</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-node">
+          <div class="pipeline-icon">&#x1F50D;</div>
+          <div class="pipeline-name">Avanzado</div>
+          <div class="pipeline-tech">NER · LDA · FAISS</div>
+        </div>
+        <div class="pipeline-arrow">&#x2192;</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-node">
+          <div class="pipeline-icon">&#x1F4A1;</div>
+          <div class="pipeline-name">Insights</div>
+          <div class="pipeline-tech">Dashboard OpinIA</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ CHARTS ═══════ -->
+<section>
+  <div class="container">
+    <p class="section-label reveal">Análisis en profundidad</p>
+    <h2 class="section-title reveal">Resultados del modelado</h2>
+    <p class="section-desc reveal">Comparativa completa de los 6 modelos evaluados con métricas de F1, Accuracy y rendimiento por clase.</p>
+
+    <div class="chart-row">
+      <div class="chart-card">
+        <div class="chart-title">Comparativa de modelos</div>
+        <div class="chart-subtitle">F1 Score (weighted) y Accuracy por modelo</div>
+        <div class="chart-container">
+          <canvas id="chartModelos"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Distribución del dataset</div>
+        <div class="chart-subtitle">Sentimiento: 40% negativo · 20% neutro · 40% positivo</div>
+        <div class="chart-container square">
+          <canvas id="chartSentimiento"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card">
+        <div class="chart-title">Recall por clase</div>
+        <div class="chart-subtitle">Mejora del neutro: de 22% (clásico) a 50% (BERT)</div>
+        <div class="chart-container">
+          <canvas id="chartRecall"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Velocidad vs. rendimiento</div>
+        <div class="chart-subtitle">Cada burbuja = un modelo · Tamaño = F1 Score</div>
+        <div class="chart-container">
+          <canvas id="chartBubble"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card full">
+        <div class="chart-title">Mejora progresiva por técnica</div>
+        <div class="chart-subtitle">Del BoW básico al transformer preentrenado: +12 puntos de F1</div>
+        <div class="chart-container" style="aspect-ratio: 3/1;">
+          <canvas id="chartProgression"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ RESULTS TABLE ═══════ -->
+<section style="background: white; padding: 4rem 0;">
+  <div class="container">
+    <p class="section-label reveal">Tabla de resultados</p>
+    <h2 class="section-title reveal">Todos los modelos, cara a cara</h2>
+    <p class="section-desc reveal">Ordenados por F1 Score descendente. El modelo ganador está destacado.</p>
+
+    <div class="reveal">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Modelo</th>
+            <th>Accuracy</th>
+            <th>F1 Score</th>
+            <th>Tiempo</th>
+            <th>Tipo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="winner">
+            <td>BERT multilingüe (zero-shot)</td>
+            <td><span class="metric-bar" style="width: 76px;"></span>75.95%</td>
+            <td><span class="metric-bar" style="width: 76px;"></span>75.93%</td>
+            <td>288 s</td>
+            <td>Transformer</td>
+          </tr>
+          <tr>
+            <td>DistilBERT fine-tuned</td>
+            <td><span class="metric-bar" style="width: 72px;"></span>72.30%</td>
+            <td><span class="metric-bar" style="width: 71px;"></span>71.50%</td>
+            <td>243 s</td>
+            <td>Transformer</td>
+          </tr>
+          <tr>
+            <td>LogReg + TF-IDF</td>
+            <td><span class="metric-bar" style="width: 70px;"></span>70.57%</td>
+            <td><span class="metric-bar" style="width: 68px;"></span>68.08%</td>
+            <td>33 s</td>
+            <td>Clásico</td>
+          </tr>
+          <tr>
+            <td>LogReg + BoW</td>
+            <td><span class="metric-bar" style="width: 69px;"></span>69.42%</td>
+            <td><span class="metric-bar" style="width: 67px;"></span>67.44%</td>
+            <td>38 s</td>
+            <td>Clásico</td>
+          </tr>
+          <tr>
+            <td>SVM + TF-IDF</td>
+            <td><span class="metric-bar" style="width: 70px;"></span>69.79%</td>
+            <td><span class="metric-bar" style="width: 67px;"></span>67.06%</td>
+            <td>20 s</td>
+            <td>Clásico</td>
+          </tr>
+          <tr>
+            <td>RF + TF-IDF</td>
+            <td><span class="metric-bar" style="width: 65px;"></span>65.50%</td>
+            <td><span class="metric-bar" style="width: 58px;"></span>58.28%</td>
+            <td>116 s</td>
+            <td>Clásico</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ TECHNIQUES ═══════ -->
+<section>
+  <div class="container">
+    <p class="section-label reveal">Más allá de la clasificación</p>
+    <h2 class="section-title reveal">Técnicas avanzadas implementadas</h2>
+
+    <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+      <div class="kpi-card">
+        <div class="kpi-number" style="font-size: 1.6rem; color: var(--azul);">Zero-shot</div>
+        <div class="kpi-label" style="margin-top: 0.5rem;">Clasificación sin entrenamiento</div>
+        <div class="kpi-detail">BART-MNLI · 6 categorías de negocio personalizadas · 99% confianza en «producto defectuoso»</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-number" style="font-size: 1.6rem; color: var(--azul);">NER</div>
+        <div class="kpi-label" style="margin-top: 0.5rem;">Extracción de entidades</div>
+        <div class="kpi-detail">BERT Spanish NER · Marcas detectadas: Apple (0.98), Cybex Gold (0.99) · Análisis competitivo</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-number" style="font-size: 1.6rem; color: var(--azul);">LDA</div>
+        <div class="kpi-label" style="margin-top: 0.5rem;">Modelado de temas</div>
+        <div class="kpi-detail">8 temas descubiertos automáticamente · Calidad-precio, audio, accesorios, regalos, quejas</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-number" style="font-size: 1.6rem; color: var(--azul);">FAISS</div>
+        <div class="kpi-label" style="margin-top: 0.5rem;">Búsqueda semántica</div>
+        <div class="kpi-detail">Sentence-BERT + FAISS · 384 dims · Similitud >0.86 para consultas en lenguaje natural</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ CONCLUSION ═══════ -->
+<section>
+  <div class="container">
+    <div class="conclusion-card reveal">
+      <h3>Visión de producto</h3>
+      <p>OpinIA demuestra que con PLN moderno es posible transformar miles de reseñas en inteligencia de negocio accionable. El mejor modelo alcanza un F1 de 0.76, las técnicas avanzadas (zero-shot, NER, LDA, FAISS) ofrecen capacidades que ningún competidor combina, y todo el pipeline corre en 31 minutos en una GPU gratuita. El siguiente paso: un MVP con API REST y dashboard para validar con 3-5 clientes piloto del sector e-commerce español.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer>
+  <p><strong>María Luisa Ros Bolea</strong> · malurosbolea@gmail.com · <a href="https://www.linkedin.com/in/mar%C3%ADa-luisa-ros-bolea-400780160/" target="_blank">LinkedIn</a> · <a href="https://malurosbolea-ux.github.io/digital-strategy-portfolio/" target="_blank">Portfolio</a></p>
+  <p style="margin-top: 0.5rem;">OpinIA · Máster Big Data e IA · CEU San Pablo · 2026</p>
+</footer>
+
+<script>
+// ── Chart.js defaults ──
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.color = '#7B8794';
+
+const COLORS = {
+  rosa: '#F2B5D4',
+  lavanda: '#B8A9D0',
+  azul: '#5B9BD5',
+  azulOscuro: '#2E5F8A',
+  melocoton: '#FFD4B8',
+  navy: '#0f172a',
+  gris: '#7B8794'
+};
+
+// ── 1. Comparativa de modelos ──
+new Chart(document.getElementById('chartModelos'), {
+  type: 'bar',
+  data: {
+    labels: ['RF+TFIDF', 'SVM+TFIDF', 'LR+BoW', 'LR+TFIDF', 'DistilBERT', 'BERT zero-shot'],
+    datasets: [
+      {
+        label: 'F1 Score',
+        data: [0.5828, 0.6706, 0.6744, 0.6808, 0.7150, 0.7593],
+        backgroundColor: COLORS.rosa + 'cc',
+        borderColor: COLORS.rosa,
+        borderWidth: 2,
+        borderRadius: 6,
+        barPercentage: 0.6
+      },
+      {
+        label: 'Accuracy',
+        data: [0.6550, 0.6979, 0.6942, 0.7057, 0.7230, 0.7595],
+        backgroundColor: COLORS.lavanda + 'cc',
+        borderColor: COLORS.lavanda,
+        borderWidth: 2,
+        borderRadius: 6,
+        barPercentage: 0.6
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    scales: {
+      x: { min: 0.4, max: 0.85, grid: { color: '#f0f0f5' }, ticks: { callback: v => (v*100).toFixed(0)+'%' } },
+      y: { grid: { display: false } }
+    },
+    plugins: {
+      legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16 } },
+      tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + (ctx.raw*100).toFixed(2) + '%' } }
+    }
+  }
+});
+
+// ── 2. Distribución de sentimiento ──
+new Chart(document.getElementById('chartSentimiento'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Negativo (1-2★)', 'Neutro (3★)', 'Positivo (4-5★)'],
+    datasets: [{
+      data: [84000, 42000, 84000],
+      backgroundColor: [COLORS.rosa, COLORS.lavanda, COLORS.azul],
+      borderColor: '#fff',
+      borderWidth: 4,
+      hoverOffset: 12
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '55%',
+    plugins: {
+      legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', padding: 12, font: { size: 11 } } },
+      tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.raw.toLocaleString() + ' (' + Math.round(ctx.raw/2100) + '%)' } }
+    }
+  }
+});
+
+// ── 3. Recall por clase ──
+new Chart(document.getElementById('chartRecall'), {
+  type: 'bar',
+  data: {
+    labels: ['Negativo', 'Neutro', 'Positivo'],
+    datasets: [
+      {
+        label: 'LogReg + TF-IDF',
+        data: [83, 22, 83],
+        backgroundColor: COLORS.melocoton + 'cc',
+        borderColor: COLORS.melocoton,
+        borderWidth: 2,
+        borderRadius: 6
+      },
+      {
+        label: 'BERT multilingüe',
+        data: [84, 50, 82],
+        backgroundColor: COLORS.azul + 'cc',
+        borderColor: COLORS.azul,
+        borderWidth: 2,
+        borderRadius: 6
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: { min: 0, max: 100, grid: { color: '#f0f0f5' }, ticks: { callback: v => v + '%' } },
+      x: { grid: { display: false } }
+    },
+    plugins: {
+      legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16 } },
+      tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.raw + '% recall' } }
+    }
+  }
+});
+
+// ── 4. Bubble chart: Speed vs Performance ──
+new Chart(document.getElementById('chartBubble'), {
+  type: 'bubble',
+  data: {
+    datasets: [
+      { label: 'RF+TFIDF', data: [{x:116.4, y:0.5828, r:12}], backgroundColor: COLORS.gris+'88' },
+      { label: 'SVM+TFIDF', data: [{x:19.9, y:0.6706, r:14}], backgroundColor: COLORS.melocoton+'bb' },
+      { label: 'LR+BoW', data: [{x:37.9, y:0.6744, r:14}], backgroundColor: COLORS.melocoton+'bb' },
+      { label: 'LR+TFIDF', data: [{x:32.9, y:0.6808, r:15}], backgroundColor: COLORS.lavanda+'bb' },
+      { label: 'DistilBERT', data: [{x:242.6, y:0.7150, r:17}], backgroundColor: COLORS.azul+'bb' },
+      { label: 'BERT zero-shot', data: [{x:288.2, y:0.7593, r:20}], backgroundColor: COLORS.rosa+'cc' },
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: { title: { display: true, text: 'Tiempo (segundos)', font: { weight: 600 } }, grid: { color: '#f0f0f5' } },
+      y: { title: { display: true, text: 'F1 Score', font: { weight: 600 } }, min: 0.5, max: 0.82, grid: { color: '#f0f0f5' },
+        ticks: { callback: v => (v*100).toFixed(0)+'%' } }
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: {
+        label: ctx => ctx.dataset.label + ' — F1: ' + (ctx.raw.y*100).toFixed(1) + '% · ' + ctx.raw.x + 's'
+      }}
+    }
+  }
+});
+
+// ── 5. Progression chart ──
+new Chart(document.getElementById('chartProgression'), {
+  type: 'line',
+  data: {
+    labels: ['RF+TFIDF', 'SVM+TFIDF', 'LR+BoW', 'LR+TFIDF', 'DistilBERT\n(fine-tuned)', 'BERT\n(zero-shot)'],
+    datasets: [{
+      label: 'F1 Score',
+      data: [58.28, 67.06, 67.44, 68.08, 71.50, 75.93],
+      fill: true,
+      backgroundColor: (ctx) => {
+        const g = ctx.chart.ctx.createLinearGradient(0, 0, ctx.chart.width, 0);
+        g.addColorStop(0, COLORS.melocoton + '44');
+        g.addColorStop(0.5, COLORS.rosa + '44');
+        g.addColorStop(1, COLORS.lavanda + '44');
+        return g;
+      },
+      borderColor: COLORS.azulOscuro,
+      borderWidth: 3,
+      pointBackgroundColor: [COLORS.gris, COLORS.melocoton, COLORS.melocoton, COLORS.lavanda, COLORS.azul, COLORS.rosa],
+      pointBorderColor: '#fff',
+      pointBorderWidth: 3,
+      pointRadius: 8,
+      pointHoverRadius: 12,
+      tension: 0.35
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: { min: 50, max: 82, grid: { color: '#f0f0f5' }, ticks: { callback: v => v + '%' } },
+      x: { grid: { display: false } }
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => 'F1 Score: ' + ctx.raw.toFixed(2) + '%' } }
+    }
+  }
+});
+
+// ── Scroll Animations ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.reveal, .kpi-card, .chart-card, .pipeline-node').forEach(el => observer.observe(el));
+
+// ── Animated Counters ──
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      const target = parseFloat(el.dataset.target);
+      const suffix = el.dataset.suffix || '';
+      const duration = 1500;
+      const start = performance.now();
+      const isDecimal = target % 1 !== 0;
+
+      const animate = (now) => {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = eased * target;
+        el.textContent = (isDecimal ? current.toFixed(1) : Math.round(current)) + suffix;
+        if (progress < 1) requestAnimationFrame(animate);
+      };
+      requestAnimationFrame(animate);
+      counterObserver.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.kpi-number[data-target]').forEach(el => counterObserver.observe(el));
+</script>
+</body>
+</html>

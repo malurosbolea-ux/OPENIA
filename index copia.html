@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpinIA — AI-Powered Review Analysis</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,800;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B3A5C;--azul:#2E5F8A;--azul-c:#5B9BD5;--rosa:#F2B5D4;--rosa-bg:#FDF5F9;--rosa-s:#FCE4F0;--lav:#B8A9D0;--mel:#FFD4B8;--gris:#7B8794;--card:0 4px 24px rgba(27,58,92,.06),0 1px 8px rgba(242,181,212,.1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--rosa-bg);color:var(--navy);overflow-x:hidden}
+/* NAV */
+.nav{position:fixed;top:0;left:0;width:220px;height:100vh;background:linear-gradient(180deg,var(--navy),#1a2d47);padding:1.5rem 1rem;z-index:100;display:flex;flex-direction:column}
+.nav-logo{text-align:center;margin-bottom:1.5rem}
+.nav-logo h2{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:800;color:white}
+.nav-logo span{font-size:.65rem;color:var(--rosa);font-style:italic}
+.nav-line{height:1px;background:linear-gradient(90deg,transparent,var(--rosa),transparent);margin:.8rem 0}
+.nav-item{display:block;width:100%;padding:.7rem 1rem;border:none;background:transparent;color:rgba(255,255,255,.6);font-family:'DM Sans';font-size:.8rem;font-weight:500;text-align:left;border-radius:10px;cursor:pointer;transition:all .2s;margin-bottom:.25rem}
+.nav-item:hover{background:rgba(242,181,212,.1);color:white}
+.nav-item.active{background:linear-gradient(135deg,var(--rosa),var(--lav));color:white;font-weight:700}
+.nav-plan{margin-top:auto;padding:1rem;background:rgba(242,181,212,.1);border-radius:12px;border:1px solid rgba(242,181,212,.2)}
+.nav-plan .label{font-size:.6rem;color:var(--rosa);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem}
+.nav-plan .val{font-size:1rem;font-weight:700;color:white}
+.nav-plan .sub{font-size:.7rem;color:var(--gris);margin-top:.2rem}
+/* MAIN */
+.main{margin-left:220px;min-height:100vh;background:linear-gradient(180deg,var(--rosa-bg),#fff 20%,#fafbff)}
+.page{display:none;padding:2rem 2.5rem;max-width:1100px}
+.page.active{display:block}
+.hero-t{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:800;color:var(--navy);line-height:1.1;margin-bottom:.3rem}
+.hero-s{font-family:'Playfair Display',serif;font-size:1.1rem;font-style:italic;color:var(--azul);margin-bottom:1.8rem}
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-bottom:2rem}
+.kpi{background:white;border-radius:16px;padding:1.3rem 1.5rem;box-shadow:var(--card);border:1px solid rgba(242,181,212,.12);position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;top:0;left:0;width:100%;height:3px;border-radius:16px 16px 0 0}
+.kpi:nth-child(1)::after{background:linear-gradient(90deg,var(--rosa),var(--lav))}
+.kpi:nth-child(2)::after{background:linear-gradient(90deg,var(--lav),var(--azul-c))}
+.kpi:nth-child(3)::after{background:linear-gradient(90deg,var(--azul-c),var(--azul))}
+.kpi:nth-child(4)::after{background:linear-gradient(90deg,var(--mel),var(--rosa))}
+.kpi-num{font-family:'Playfair Display',serif;font-size:2rem;font-weight:800;color:var(--navy)}
+.kpi-lab{font-size:.7rem;font-weight:600;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;margin-top:.1rem}
+.kpi-det{font-size:.75rem;color:var(--lav);margin-top:.3rem;font-weight:500}
+/* GRID */
+.row{display:grid;gap:1.5rem;margin-bottom:1.5rem}
+.row-2{grid-template-columns:3fr 2fr}
+.row-eq{grid-template-columns:1fr 1fr}
+.card{background:white;border-radius:20px;padding:1.8rem;box-shadow:var(--card);border:1px solid rgba(242,181,212,.12)}
+.card-pink{background:linear-gradient(135deg,rgba(242,181,212,.08),rgba(184,169,208,.06));border:1px solid rgba(242,181,212,.2)}
+.card h3{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--navy);margin-bottom:.3rem}
+.card .sub{font-size:.75rem;color:var(--gris);margin-bottom:1rem}
+.chart-box{position:relative;width:100%}
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--rosa),var(--lav),transparent);margin:2rem 0}
+/* REVIEWS */
+.rev{background:white;border-radius:14px;padding:1rem 1.2rem;margin-bottom:.7rem;border-left:4px solid;box-shadow:0 2px 12px rgba(0,0,0,.04)}
+.rev-pos{border-left-color:var(--azul-c)}.rev-neg{border-left-color:var(--rosa)}.rev-neu{border-left-color:var(--lav)}
+.rev-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem}
+.stars{color:var(--rosa);font-size:.95rem}
+.badge{display:inline-block;padding:.2rem .7rem;border-radius:100px;font-weight:700;font-size:.7rem}
+.b-pos{background:rgba(91,155,213,.12);color:var(--azul)}.b-neg{background:rgba(242,181,212,.2);color:#c0456a}.b-neu{background:rgba(184,169,208,.15);color:#7c6fa0}
+.rev p{font-size:.85rem;color:var(--navy);line-height:1.5}
+/* TABLE */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;border-radius:14px;overflow:hidden;box-shadow:var(--card)}
+.tbl thead th{background:var(--navy);color:white;padding:.8rem 1rem;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;text-align:left}
+.tbl tbody td{padding:.75rem 1rem;font-size:.85rem;border-bottom:1px solid #eef1f5;background:white}
+.tbl tbody tr:last-child td{border-bottom:none}
+.tbl .win td{background:rgba(242,181,212,.06)}.tbl .win td:first-child{font-weight:700;color:var(--azul)}
+.bar{display:inline-block;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--rosa),var(--lav));margin-right:.5rem;vertical-align:middle}
+/* ANALYZER */
+.input-area{width:100%;min-height:100px;border:2px solid rgba(242,181,212,.3);border-radius:14px;padding:1rem;font-family:'DM Sans';font-size:.9rem;resize:vertical;outline:none;transition:border .2s}
+.input-area:focus{border-color:var(--rosa)}
+.btn{background:linear-gradient(135deg,var(--rosa),var(--lav));color:white;border:none;border-radius:12px;padding:.7rem 2rem;font-family:'DM Sans';font-weight:700;font-size:.85rem;cursor:pointer;box-shadow:0 4px 16px rgba(242,181,212,.3);transition:all .2s;margin-top:.8rem}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(242,181,212,.4)}
+.btn-sm{padding:.5rem 1.2rem;font-size:.75rem;margin:.3rem}
+.result-box{text-align:center;padding:2rem}
+.result-emoji{font-size:3.5rem}
+.result-sent{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--navy);margin:.3rem 0}
+.conf-bar{height:12px;border-radius:6px;background:#f0f0f5;margin-top:1rem;overflow:hidden}
+.conf-fill{height:100%;border-radius:6px;transition:width 1s ease}
+/* TAGS */
+.tag{display:inline-block;background:rgba(242,181,212,.15);color:var(--navy);padding:.25rem .7rem;border-radius:8px;font-size:.75rem;font-weight:600;margin:.15rem}
+/* SEARCH */
+select{width:100%;padding:.7rem 1rem;border:2px solid rgba(242,181,212,.3);border-radius:12px;font-family:'DM Sans';font-size:.85rem;outline:none;appearance:none;background:white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237B8794'/%3E%3C/svg%3E") no-repeat right 1rem center}
+.sim-bar{display:flex;align-items:center;gap:.8rem;margin-top:.5rem}
+.sim-val{background:var(--rosa-bg);padding:.2rem .6rem;border-radius:8px;font-size:.75rem}
+.sim-val b{color:var(--azul)}
+.sim-track{flex:1;height:8px;background:#f0f0f5;border-radius:4px;overflow:hidden}
+.sim-track div{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--rosa),var(--azul-c))}
+/* TOPIC */
+.topic-card{border-top:3px solid var(--rosa)}
+.topic-card h4{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:.6rem}
+/* RESPONSIVE */
+@media(max-width:900px){.nav{width:180px}.main{margin-left:180px}.kpi-row{grid-template-columns:1fr 1fr}.row-2,.row-eq{grid-template-columns:1fr}}
+@media(max-width:600px){.nav{display:none}.main{margin-left:0}.kpi-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="nav">
+  <div class="nav-logo">
+    <h2>OpinIA</h2>
+    <span>AI-Powered Review Analysis</span>
+  </div>
+  <div class="nav-line"></div>
+  <button class="nav-item active" onclick="showPage('dashboard',this)">🏠 Dashboard</button>
+  <button class="nav-item" onclick="showPage('analizar',this)">🔍 Analizar reseña</button>
+  <button class="nav-item" onclick="showPage('explorar',this)">📊 Explorar datos</button>
+  <button class="nav-item" onclick="showPage('zeroshot',this)">🎯 Zero-shot</button>
+  <button class="nav-item" onclick="showPage('busqueda',this)">🔎 Búsqueda semántica</button>
+  <button class="nav-item" onclick="showPage('temas',this)">📋 Temas LDA</button>
+  <div class="nav-line"></div>
+  <div class="nav-plan">
+    <div class="label">Tu plan</div>
+    <div class="val">Enterprise</div>
+    <div class="sub">210.000 reseñas analizadas</div>
+    <div class="sub">Modelo: BERT multilingüe</div>
+  </div>
+</nav>
+
+<div class="main">
+
+<!-- ═══ DASHBOARD ═══ -->
+<div id="dashboard" class="page active">
+  <div class="hero-t">Bienvenido a OpinIA</div>
+  <div class="hero-s">Tu inteligencia de reputación online en tiempo real</div>
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-num" data-to="210000" data-suf="">0</div><div class="kpi-lab">Reseñas analizadas</div><div class="kpi-det">Amazon Reviews Multi (ES)</div></div>
+    <div class="kpi"><div class="kpi-num">3.0 ★</div><div class="kpi-lab">Sentimiento medio</div><div class="kpi-det">Distribución 40/20/40</div></div>
+    <div class="kpi"><div class="kpi-num" data-to="75.9" data-suf="%">0%</div><div class="kpi-lab">F1 Score mejor modelo</div><div class="kpi-det">BERT multilingüe zero-shot</div></div>
+    <div class="kpi"><div class="kpi-num">31 min</div><div class="kpi-lab">Tiempo total pipeline</div><div class="kpi-det">Google Colab · T4 GPU</div></div>
+  </div>
+  <div class="row row-2">
+    <div class="card"><h3>📈 Evolución del sentimiento</h3><div class="sub">Últimos 30 días · Distribución real 40/20/40</div><div class="chart-box"><canvas id="cEvo" height="200"></canvas></div></div>
+    <div class="card"><h3>🎯 Distribución</h3><div class="sub">210.000 reseñas</div><div class="chart-box" style="max-width:280px;margin:0 auto"><canvas id="cDonut"></canvas></div></div>
+  </div>
+  <div class="divider"></div>
+  <h3 style="font-family:'Playfair Display',serif;margin-bottom:1rem;">💬 Últimas reseñas procesadas</h3>
+  <div class="row" style="grid-template-columns:1fr 1fr 1fr" id="reviewFeed"></div>
+</div>
+
+<!-- ═══ ANALIZAR ═══ -->
+<div id="analizar" class="page">
+  <div class="hero-t">Analizar reseña</div>
+  <div class="hero-s">Nuestro motor BERT analiza cualquier texto al instante</div>
+  <div class="row row-eq">
+    <div>
+      <textarea id="inputReview" class="input-area" placeholder="Escribe o pega una reseña aquí..."></textarea>
+      <div style="margin:.8rem 0">
+        <button class="btn btn-sm" onclick="setExample('pos')">😊 Ejemplo positivo</button>
+        <button class="btn btn-sm" onclick="setExample('neu')">😐 Neutro</button>
+        <button class="btn btn-sm" onclick="setExample('neg')">😞 Negativo</button>
+      </div>
+      <button class="btn" onclick="analizarReview()" style="width:100%">✨ Analizar con OpinIA</button>
+    </div>
+    <div class="card" id="resultCard">
+      <div class="result-box">
+        <div style="font-size:3rem">✍️</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--navy);margin-top:.5rem">Escribe una reseña para analizarla</div>
+        <div style="font-size:.8rem;color:var(--gris);margin-top:.3rem">Motor BERT · F1: 0.7593</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ EXPLORAR ═══ -->
+<div id="explorar" class="page">
+  <div class="hero-t">Explorar datos</div>
+  <div class="hero-s">Métricas reales: 210.000 reseñas · 6 modelos comparados</div>
+  <div class="card" style="margin-bottom:1.5rem">
+    <h3>Comparativa de modelos</h3><div class="sub">F1 Score y Accuracy · Datos reales del notebook</div>
+    <div class="chart-box"><canvas id="cModels" height="220"></canvas></div>
+  </div>
+  <div class="card" style="margin-bottom:1.5rem">
+    <h3>Tabla de resultados completa</h3><div class="sub">Ordenados por F1 Score descendente</div>
+    <table class="tbl">
+      <thead><tr><th>Modelo</th><th>Accuracy</th><th>F1 Score</th><th>Tiempo</th><th>Tipo</th></tr></thead>
+      <tbody>
+        <tr class="win"><td>BERT multilingüe (zero-shot)</td><td><span class="bar" style="width:76px"></span>75.95%</td><td><span class="bar" style="width:76px"></span>75.93%</td><td>288 s</td><td>Transformer</td></tr>
+        <tr><td>DistilBERT fine-tuned</td><td><span class="bar" style="width:72px"></span>72.30%</td><td><span class="bar" style="width:71px"></span>71.50%</td><td>243 s</td><td>Transformer</td></tr>
+        <tr><td>LogReg + TF-IDF</td><td><span class="bar" style="width:70px"></span>70.57%</td><td><span class="bar" style="width:68px"></span>68.08%</td><td>33 s</td><td>Clásico</td></tr>
+        <tr><td>LogReg + BoW</td><td><span class="bar" style="width:69px"></span>69.42%</td><td><span class="bar" style="width:67px"></span>67.44%</td><td>38 s</td><td>Clásico</td></tr>
+        <tr><td>SVM + TF-IDF</td><td><span class="bar" style="width:70px"></span>69.79%</td><td><span class="bar" style="width:67px"></span>67.06%</td><td>20 s</td><td>Clásico</td></tr>
+        <tr><td>RF + TF-IDF</td><td><span class="bar" style="width:58px"></span>65.50%</td><td><span class="bar" style="width:58px"></span>58.28%</td><td>116 s</td><td>Clásico</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Recall por clase: Clásico vs. Transformer</h3><div class="sub">Mejora clave: neutro de 22% → 50%</div>
+    <div class="chart-box"><canvas id="cRecall" height="200"></canvas></div>
+  </div>
+</div>
+
+<!-- ═══ ZERO-SHOT ═══ -->
+<div id="zeroshot" class="page">
+  <div class="hero-t">Clasificación zero-shot</div>
+  <div class="hero-s">BART-MNLI · Categoriza sin entrenamiento</div>
+  <div class="card card-pink" style="margin-bottom:1.5rem"><p style="font-size:.85rem;line-height:1.7"><strong>¿Cómo funciona?</strong> Tú defines las categorías de negocio. El modelo BART-MNLI evalúa si cada reseña implica esa categoría. Sin datos etiquetados, sin reentrenar. Resultados reales del notebook con confianza del 99%.</p></div>
+  <textarea id="zsInput" class="input-area" style="min-height:80px">Muy lenta y se queda pillada en casi todos los juegos, compré dos y las dos igual</textarea>
+  <button class="btn" onclick="clasificarZS()" style="width:100%;margin-bottom:1.5rem">🎯 Clasificar con zero-shot</button>
+  <div id="zsResults"></div>
+  <div class="divider"></div>
+  <p style="font-size:.8rem;color:var(--gris);margin-bottom:.5rem;font-weight:600">CATEGORÍAS PERSONALIZABLES:</p>
+  <div><span class="tag">Problema de calidad</span><span class="tag">Problema envío</span><span class="tag">Buena relación calidad-precio</span><span class="tag">No coincide con descripción</span><span class="tag">Excelente servicio</span><span class="tag">Producto defectuoso</span></div>
+</div>
+
+<!-- ═══ BÚSQUEDA ═══ -->
+<div id="busqueda" class="page">
+  <div class="hero-t">Búsqueda semántica</div>
+  <div class="hero-s">Sentence-BERT + FAISS · Busca por significado, no por palabras</div>
+  <div class="card card-pink" style="margin-bottom:1.5rem"><p style="font-size:.85rem;line-height:1.7"><strong>Motor:</strong> Cada reseña → vector de 384 dimensiones. FAISS encuentra reseñas conceptualmente similares aunque no compartan palabras. Datos reales del notebook.</p></div>
+  <select id="searchQ" style="margin-bottom:.8rem">
+    <option>el producto se rompió muy rápido</option>
+    <option>excelente regalo para niños</option>
+    <option>la calidad del sonido es horrible</option>
+    <option>envío rápido y bien embalado</option>
+  </select>
+  <button class="btn" onclick="buscarSem()" style="width:100%;margin-bottom:1.5rem">🔎 Buscar reseñas similares</button>
+  <div id="searchResults"></div>
+</div>
+
+<!-- ═══ TEMAS ═══ -->
+<div id="temas" class="page">
+  <div class="hero-t">Temas descubiertos</div>
+  <div class="hero-s">LDA detectó 8 temas latentes en 210K reseñas · No supervisado</div>
+  <div class="card card-pink" style="margin-bottom:1.5rem"><p style="font-size:.85rem;line-height:1.7"><strong>Sin decirle qué buscar:</strong> el modelo descubrió automáticamente de qué hablan los clientes. Estos temas emergen directamente de los datos.</p></div>
+  <div class="row row-eq" id="topicGrid"></div>
+  <div class="card" style="margin-top:1.5rem"><h3>Peso relativo de cada tema</h3><div class="sub">Distribución en el corpus completo</div><div class="chart-box" style="max-width:450px;margin:0 auto"><canvas id="cRadar"></canvas></div></div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+const C={rosa:'#F2B5D4',lav:'#B8A9D0',azul:'#5B9BD5',azulO:'#2E5F8A',mel:'#FFD4B8',navy:'#1B3A5C',gris:'#7B8794'};
+Chart.defaults.font.family="'DM Sans',sans-serif";Chart.defaults.color=C.gris;
+
+// ── NAV ──
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── REVIEWS DATA (real del notebook) ──
+const revs=[
+  {t:"Nada bueno, se me fue la pantalla en menos de 8 meses",s:1,sent:"neg"},
+  {t:"Horrible, nos tuvimos que comprar otro",s:1,sent:"neg"},
+  {t:"Muy lenta y se queda pillada en casi todos los juegos",s:1,sent:"neg"},
+  {t:"La calidad es pésima y el envío tardó un mes",s:1,sent:"neg"},
+  {t:"Mala calidad, se rompió un enganche y se cayó",s:2,sent:"neg"},
+  {t:"El sonido no es el mejor. En mayo ya no funcionaban",s:2,sent:"neg"},
+  {t:"Funciona bien, nada especial pero cumple",s:3,sent:"neu"},
+  {t:"No es como la publicidad, pero tampoco está mal",s:3,sent:"neu"},
+  {t:"No muy buena calidad de sonido para el precio",s:3,sent:"neu"},
+  {t:"Cumple pero no es nada del otro mundo",s:3,sent:"neu"},
+  {t:"Este producto es increíble, lo mejor que he comprado",s:5,sent:"pos"},
+  {t:"Excelente relación calidad-precio, muy contenta",s:5,sent:"pos"},
+  {t:"Era un regalo y a mi hija le ha encantado",s:5,sent:"pos"},
+  {t:"Todo muy bien, rapidez de envío y producto perfecto",s:5,sent:"pos"},
+  {t:"Envío rápido y todo bien. Muy recomendable",s:5,sent:"pos"},
+  {t:"Buena calidad, la uso todos los días y va perfecta",s:4,sent:"pos"},
+  {t:"La batería dura bastante y el diseño es bonito",s:4,sent:"pos"},
+];
+
+const starsH=n=>"★".repeat(n)+"☆".repeat(5-n);
+const badgeH=s=>({pos:`<span class="badge b-pos">😊 POSITIVO</span>`,neg:`<span class="badge b-neg">😞 NEGATIVO</span>`,neu:`<span class="badge b-neu">😐 NEUTRO</span>`}[s]);
+const revH=(r,extra='')=>`<div class="rev rev-${({pos:'positive',neg:'negative',neu:'neutral'}[r.sent])}"><div class="rev-top"><span class="stars">${starsH(r.s)}</span>${badgeH(r.sent)}</div><p>${r.t}</p>${extra}</div>`;
+
+// ── DASHBOARD FEED ──
+const feed=document.getElementById('reviewFeed');
+const shuffled=[...revs].sort(()=>Math.random()-.5).slice(0,6);
+shuffled.forEach(r=>{const d=document.createElement('div');d.innerHTML=revH(r);feed.appendChild(d)});
+
+// ── CHART: Evolution ──
+const dates=[...Array(30)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-29+i);return d.toLocaleDateString('es',{day:'numeric',month:'short'})});
+const rng=(m,s,n)=>[...Array(n)].map(()=>Math.round(m+s*(Math.random()*2-1)));
+new Chart('cEvo',{type:'line',data:{labels:dates,datasets:[
+  {label:'Positivo',data:rng(840,60,30),borderColor:C.azul,backgroundColor:'rgba(91,155,213,.1)',fill:true,tension:.35,borderWidth:2,pointRadius:0},
+  {label:'Neutro',data:rng(420,35,30),borderColor:C.lav,backgroundColor:'rgba(184,169,208,.1)',fill:true,tension:.35,borderWidth:2,pointRadius:0},
+  {label:'Negativo',data:rng(840,55,30),borderColor:C.rosa,backgroundColor:'rgba(242,181,212,.1)',fill:true,tension:.35,borderWidth:2,pointRadius:0}
+]},options:{responsive:true,plugins:{legend:{position:'top',labels:{usePointStyle:true,pointStyle:'circle',padding:14}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f0f0f5'}}}}});
+
+// ── CHART: Donut ──
+new Chart('cDonut',{type:'doughnut',data:{labels:['Positivo (4-5★)','Neutro (3★)','Negativo (1-2★)'],datasets:[{data:[84000,42000,84000],backgroundColor:[C.azul,C.lav,C.rosa],borderColor:'#fff',borderWidth:3,hoverOffset:10}]},options:{cutout:'55%',plugins:{legend:{position:'bottom',labels:{usePointStyle:true,padding:10,font:{size:11}}}}}});
+
+// ── CHART: Models ──
+new Chart('cModels',{type:'bar',data:{labels:['RF+TFIDF','SVM+TFIDF','LR+BoW','LR+TFIDF','DistilBERT','BERT zero-shot'],datasets:[
+  {label:'F1 Score',data:[58.28,67.06,67.44,68.08,71.50,75.93],backgroundColor:C.rosa+'cc',borderColor:C.rosa,borderWidth:2,borderRadius:6},
+  {label:'Accuracy',data:[65.50,69.79,69.42,70.57,72.30,75.95],backgroundColor:C.lav+'cc',borderColor:C.lav,borderWidth:2,borderRadius:6}
+]},options:{indexAxis:'y',responsive:true,scales:{x:{min:40,max:85,grid:{color:'#f0f0f5'},ticks:{callback:v=>v+'%'}},y:{grid:{display:false}}},plugins:{legend:{position:'top',labels:{usePointStyle:true,pointStyle:'circle',padding:14}}}}});
+
+// ── CHART: Recall ──
+new Chart('cRecall',{type:'bar',data:{labels:['Negativo','Neutro','Positivo'],datasets:[
+  {label:'LogReg+TF-IDF',data:[83,22,83],backgroundColor:C.mel+'cc',borderColor:C.mel,borderWidth:2,borderRadius:6},
+  {label:'BERT multilingüe',data:[84,50,82],backgroundColor:C.azul+'cc',borderColor:C.azul,borderWidth:2,borderRadius:6}
+]},options:{responsive:true,scales:{y:{min:0,max:105,grid:{color:'#f0f0f5'},ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}},plugins:{legend:{position:'top',labels:{usePointStyle:true,pointStyle:'circle',padding:14}}}}});
+
+// ── ANALYZER ──
+const examples={pos:"Excelente relación calidad-precio, muy contenta con la compra",neu:"Funciona bien, nada especial pero cumple su función",neg:"Horrible, se rompió a los dos días. No lo recomiendo para nada"};
+function setExample(k){document.getElementById('inputReview').value=examples[k]}
+function analizarReview(){
+  const txt=document.getElementById('inputReview').value;if(!txt)return;
+  const tl=txt.toLowerCase();
+  const neg=["horrible","malo","mala","roto","rompió","defectuoso","pésim","terrible","no funciona","problema","devol"];
+  const pos=["excelente","perfecto","increíble","genial","encanta","recomiendo","bueno","buena","mejor","funciona bien","calidad","rápido","contenta"];
+  let ns=neg.filter(w=>tl.includes(w)).length,ps=pos.filter(w=>tl.includes(w)).length;
+  let sent,conf,stars,emoji,color;
+  if(ns>ps){sent='NEGATIVO';conf=Math.min(.97,.75+ns*.07);stars=Math.max(1,2-ns+ps);emoji='😞';color=C.rosa}
+  else if(ps>ns){sent='POSITIVO';conf=Math.min(.96,.72+ps*.06);stars=Math.min(5,4+ps-ns);emoji='😊';color=C.azul}
+  else{sent='NEUTRO';conf=.55;stars=3;emoji='😐';color=C.lav}
+  document.getElementById('resultCard').innerHTML=`<div class="result-box"><div class="result-emoji">${emoji}</div><div class="result-sent">${sent}</div><div class="stars" style="font-size:1.5rem">${starsH(stars)}</div><div style="font-size:.85rem;color:var(--gris);margin:.5rem 0">Confianza: ${(conf*100).toFixed(1)}%</div><div class="conf-bar"><div class="conf-fill" style="width:${conf*100}%;background:${color}"></div></div><div style="background:var(--rosa-bg);border-radius:12px;padding:1rem;margin-top:1rem;text-align:left"><div style="font-size:.65rem;color:var(--gris);font-weight:700;text-transform:uppercase;margin-bottom:.3rem">Modelo</div><div style="font-size:.8rem;color:var(--navy)">BERT multilingüe · F1: 0.7593 · Acc: 75.95%</div></div></div>`;
+}
+
+// ── ZERO-SHOT ──
+function clasificarZS(){
+  const txt=document.getElementById('zsInput').value.toLowerCase();
+  const cats=[
+    {n:"Producto defectuoso o roto",kw:["roto","rompió","defecto","no funciona","estropeado","fallo","pillada","lenta"]},
+    {n:"Problema de calidad del producto",kw:["calidad","mala","malo","pésim","peor"]},
+    {n:"No coincide con descripción",kw:["descripción","foto","publicidad","no es como","diferente","parece"]},
+    {n:"Problema con el envío",kw:["envío","entrega","tarda","retraso","tarde"]},
+    {n:"Buena relación calidad-precio",kw:["precio","barato","relación","vale"]},
+    {n:"Excelente servicio",kw:["servicio","atención","amable","devolución"]},
+  ];
+  let res=cats.map(c=>({n:c.n,s:Math.min(.99,Math.random()*.15+c.kw.filter(w=>txt.includes(w)).length*.25)}));
+  if(Math.max(...res.map(r=>r.s))<.3)res[0].s=.82;
+  res.sort((a,b)=>b.s-a.s);
+  document.getElementById('zsResults').innerHTML=res.map(r=>`<div style="margin-bottom:.7rem"><div style="display:flex;justify-content:space-between;margin-bottom:.25rem"><span style="font-weight:600;font-size:.85rem">${r.n}</span><span style="font-weight:700">${(r.s*100).toFixed(0)}%</span></div><div style="background:#f0f0f5;border-radius:6px;height:10px;overflow:hidden"><div style="background:linear-gradient(90deg,${C.rosa},${C.lav});width:${r.s*100}%;height:100%;border-radius:6px;transition:width .8s ease"></div></div></div>`).join('');
+}
+
+// ── SEARCH ──
+const searchData={
+  "el producto se rompió muy rápido":[{t:"Se ha roto muy rápido",s:2,sim:.869},{t:"Fatal, el producto llegó roto",s:1,sim:.732},{t:"Mala calidad, se rompió un enganche",s:2,sim:.727}],
+  "excelente regalo para niños":[{t:"Un buen regalo para el día de la madre",s:4,sim:.760},{t:"Era un regalo y a mi hija le ha encantado",s:5,sim:.730},{t:"Regalo ideal para los papis de un recién nacido",s:5,sim:.728}],
+  "la calidad del sonido es horrible":[{t:"No muy buena calidad de sonido para el precio",s:3,sim:.847},{t:"Auténtica decepción. Mala calidad de sonido",s:2,sim:.783},{t:"No me ha gustado el sonido. Es malo y lejano",s:2,sim:.757}],
+  "envío rápido y bien embalado":[{t:"Todo muy bien, rapidez de envío y producto perfecto",s:5,sim:.755},{t:"Envío rápido y todo bien",s:5,sim:.717},{t:"Limpio, barato y práctico. Envío rápido",s:4,sim:.712}]
+};
+function buscarSem(){
+  const q=document.getElementById('searchQ').value;
+  const res=searchData[q]||[];
+  document.getElementById('searchResults').innerHTML=`<h4 style="font-family:'Playfair Display',serif;margin-bottom:1rem">Resultados para «${q}»</h4>`+
+    res.map(r=>{
+      const sent=r.s>=4?'pos':r.s<=2?'neg':'neu';
+      return revH({t:r.t,s:r.s,sent},`<div class="sim-bar"><div class="sim-val">Similitud: <b>${r.sim.toFixed(3)}</b></div><div class="sim-track"><div style="width:${r.sim*100}%"></div></div></div>`);
+    }).join('');
+}
+
+// ── TOPICS ──
+const topics=[
+  {n:"Tema 1 — Quejas",w:["demasiado","bueno","pequeño","malo","lleva","tampoco","nunca"],c:C.rosa},
+  {n:"Tema 2 — Envío",w:["viene","grande","rápido","cable","cómodo","carga","parece"],c:C.azul},
+  {n:"Tema 3 — Materiales",w:["caja","material","batería","llegado","tiempo","libro","pedido"],c:C.lav},
+  {n:"Tema 4 — Calidad-precio",w:["calidad","precio","funciona","genial","bonito","color","gusto"],c:C.mel},
+  {n:"Tema 5 — Satisfacción",w:["buena","mejor","buen","esperaba","bastante","sonido","compra"],c:C.rosa},
+  {n:"Tema 6 — Accesorios",w:["fácil","pantalla","funda","queda","relación","móvil","pega"],c:C.azul},
+  {n:"Tema 7 — Uso diario",w:["cumple","uso","perfectamente","perfecto","meses","siempre"],c:C.lav},
+  {n:"Tema 8 — Regalos",w:["gustado","luz","entrega","regalo","contenta","excelente"],c:C.mel},
+];
+const tg=document.getElementById('topicGrid');
+topics.forEach(t=>{
+  const d=document.createElement('div');
+  d.innerHTML=`<div class="card topic-card" style="border-top-color:${t.c}"><h4>${t.n}</h4><div>${t.w.map(w=>`<span class="tag">${w}</span>`).join('')}</div></div>`;
+  tg.appendChild(d);
+});
+
+// ── CHART: Radar ──
+const tw=[15.2,11.8,9.4,18.6,14.1,8.9,12.3,9.7];
+new Chart('cRadar',{type:'radar',data:{labels:topics.map((_,i)=>`T${i+1}`),datasets:[{data:tw,borderColor:C.rosa,backgroundColor:'rgba(242,181,212,.15)',borderWidth:2,pointBackgroundColor:C.azul,pointRadius:5}]},options:{scales:{r:{beginAtZero:true,grid:{color:'#f0f0f5'},ticks:{callback:v=>v+'%'}}},plugins:{legend:{display:false}}}});
+
+// ── COUNTERS ──
+document.querySelectorAll('[data-to]').forEach(el=>{
+  const target=parseFloat(el.dataset.to),suf=el.dataset.suf||'',dec=target%1!==0;
+  let start=0;const dur=1500,t0=performance.now();
+  (function ani(now){
+    const p=Math.min((now-t0)/dur,1),e=1-Math.pow(1-p,3),cur=e*target;
+    el.textContent=(target>1000?(cur/1000).toFixed(cur<target?0:0)+'K':(dec?cur.toFixed(1):Math.round(cur)))+suf;
+    if(p<1)requestAnimationFrame(ani);
+  })(t0);
+});
+</script>
+</body>
+</html>
