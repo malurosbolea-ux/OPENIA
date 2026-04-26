@@ -25,7 +25,7 @@ HF_TOKEN = st.secrets.get("HF_TOKEN", None)
 HF_HEADERS = {"Authorization": f"Bearer {HF_TOKEN}"} if HF_TOKEN else {}
 
 def hf_query(model, payload):
-    url = f"https://api-inference.huggingface.co/models/{model}"
+    url = f"https://router.huggingface.co/hf-inference/models/{model}"
     r = requests.post(url, headers=HF_HEADERS, json=payload, timeout=60)
     if r.status_code == 503:
         st.warning("El modelo está cargando en HuggingFace, espera 20 segundos y vuelve a pulsar el botón.")
