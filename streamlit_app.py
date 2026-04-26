@@ -165,6 +165,8 @@ elif pagina == "Clasificar por categorías":
                 }
                 data = hf_query("MoritzLaurer/multilingual-MiniLMv2-L6-mnli-xnli", payload)
 
+            if data and isinstance(data, list):
+                data = {"labels": [d["label"] for d in data], "scores": [d["score"] for d in data]}
             if data and isinstance(data, dict) and "labels" in data:
                 st.markdown("")
                 st.markdown("**Resultado:**")
