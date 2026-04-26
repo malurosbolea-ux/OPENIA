@@ -27,7 +27,8 @@ GRIS = "#7B8794"
 
 @st.cache_resource
 def get_client():
-    return InferenceClient()
+    token = st.secrets.get("HF_TOKEN", None)
+    return InferenceClient(token=token)
 
 client = get_client()
 
