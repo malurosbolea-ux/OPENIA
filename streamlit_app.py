@@ -26,7 +26,11 @@ HF_HEADERS = {"Authorization": f"Bearer {HF_TOKEN}"} if HF_TOKEN else {}
 
 def hf_query(model, payload):
     url = f"https://router.huggingface.co/hf-inference/models/{model}"
-    r = requests.post(url, headers=HF_HEADERS, json=payload, timeout=60)
+    try:
+    r = requests.post(url, headers=HF_HEADERS, json=payload, timeout=120)
+except requests.exceptions.ReadTimeout:
+    st.warning("El modelo está tardando en cargar. Espera 30 segundos y vuelve a pulsar el botón.")
+    return None
     if r.status_code == 503:
         st.warning("El modelo está cargando en HuggingFace, espera 20 segundos y vuelve a pulsar el botón.")
         return None
@@ -159,7 +163,7 @@ elif pagina == "Clasificar por categorías":
                     "inputs": texto_zs[:512],
                     "parameters": {"candidate_labels": categorias, "multi_label": True},
                 }
-                data = hf_query("facebook/bart-large-mnli", payload)
+                data = hf_query("MoritzLaurer/multilingual-MiniLMv2-L6-mnli-xnli", payload)
 
             if data and isinstance(data, dict) and "labels" in data:
                 st.markdown("")
